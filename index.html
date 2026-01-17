@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <title>Vykreslení matematické funkce</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      line-height: 1.6;
+    }
+    input, button {
+      padding: 8px;
+      font-size: 16px;
+      width: 100%;
+      margin-top: 6px;
+      box-sizing: border-box;
+    }
+    canvas {
+      border: 1px solid #ccc;
+      margin-top: 20px;
+      width: 100%;
+      height: 500px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Grafické vykreslení funkce</h1>
+  <p>Zadej funkci v JavaScriptu, např.:</p>
+  <ul>
+    <li><code>Math.sin(x)</code></li>
+    <li><code>x*x - 3*x + 2</code></li>
+    <li><code>Math.log(x)</code></li>
+    <li><code>Math.cos(x) * x</code></li>
+  </ul>
+
+  <input id="funcInput" type="text" value="Math.sin(x)">
+  <button id="drawBtn">Vykreslit</button>
+
+  <canvas id="graph" width="900" height="500"></canvas>
+
+  <script>
+    const canvas = document.getElementById("graph");
+    const ctx = canvas.getContext("2d");
+    const funcInput = document.getElementById("funcInput");
+    const drawBtn = document.getElementById("drawBtn");
+
+    function drawGraph(func) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const W = canvas.width;
+      const H = canvas.height;
+
+      // Souřadnicový systém
+      const scaleX = 40; // px na jednotku
+      const scaleY = 40;
+
+      const originX = W / 2;
+      const originY = H / 2;
+
+      // Osy
+      ctx.strokeStyle = "#888";
+      ctx.lineWidth = 1;
+
+      // Osa X
+      ctx.beginPath();
+      ctx.moveTo(0, originY);
+      ctx.lineTo(W, originY);
+      ctx.stroke();
+
+      // Osa Y
+      ctx.beginPath();
+      ctx.moveTo(originX, 0);
+      ctx.lineTo(originX, H);
+      ctx.stroke();
+
+      // Funkce
+      ctx.strokeStyle = "#0077ff";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+
+      let first = true;
+
+      for (let px = 0; px < W; px++) {
+        const x = (px - originX) / scaleX;
+
+        let y;
+        try {
+          y = func(x);
+        } catch {
+          continue;
+        }
+
+        const py = originY - y * scaleY;
+
+        if (first) {
+          ctx.moveTo(px, py);
+          first = false;
+        } else {
+          ctx.lineTo(px, py);
+        }
+      }
+
+      ctx.stroke();
+    }
+
+    drawBtn.addEventListener("click", () => {
+      const input = funcInput.value.trim();
+
+      try {
+        const func = new Function("x", `return ${input};`);
+        drawGraph(func);
+      } catch (err) {
+        alert("Chyba ve funkci: " + err.message);
+      }
+    });
+
+    // První vykreslení
+    drawGraph(x => Math.sin(x));
+  </script>
+
+</body>
+</html>
